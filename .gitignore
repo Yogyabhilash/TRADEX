@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+data/cache/
+cache/llm/
+results/transcripts_dryrun/
+REVIEW_FINDINGS.json
+*.egg-info/
+build/
+dist/
+.env
+!.env.example
+.claude/
+results/portfolio.json
+results/live_decisions.csv
+results/desk/

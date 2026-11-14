@@ -1,0 +1,410 @@
+# trading-agents-lab
+
+**Do LLM trading agents actually have skill, or are they reciting memorized price history?**
+A rigorous research implementation of **TradingAgents: Multi-Agents LLM Financial Trading
+Framework** ([Xiao et al., arXiv:2412.20138](https://arxiv.org/abs/2412.20138)) — plus the
+quant research harness the paper should have had.
+
+[![CI](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Paper](https://img.shields.io/badge/arXiv-2412.20138-b31b1b)
+
+The paper simulates a trading firm with LLM agents: four analysts (market/technical,
+fundamentals, news, sentiment) feed a bull-vs-bear research debate, a trader synthesizes a
+decision, a risk-management trio (risky/neutral/safe) debates it, and a fund manager
+approves the final trade. This repo reproduces that architecture faithfully — and wraps it
+in an evaluation framework that fixes the paper's four methodological problems:
+
+| Paper's weakness | What this repo does instead |
+|---|---|
+| 3-month backtest window, 3 tickers | 11.5 years of data, 10 tickers across sectors, multi-year walk-forward test window |
+| LLM likely trained on the backtest period (Jan–Mar 2024 is inside GPT-4o's training data) | Anti-leakage prompt clause on every agent + `--anonymize` mode that masks ticker names and dates **and rebases every price to an index (first displayed close = 100) with volume as % of the window average**, so no raw price or volume level — the fingerprint that identifies a well-known stock — reaches the prompt (residual risk remains — see Limitations) |
+| No transaction costs | 10 bps per unit turnover, always on; cost sensitivity reported |
+| Weak baselines (naive MACD/SMA rules) | The paper's five baselines **plus** a LightGBM walk-forward model (expanding window, embargoed splits) as a serious ML benchmark |
+
+## The headline result
+
+With memorization masked, the agent desk **did not beat buy-and-hold**. Run fully
+anonymized (the model sees `TICKER-X` and `Day T`, never "AAPL" or a date), the agents
+shorted a March dip, stayed short (−0.30) through the entire April recovery, and only
+flipped long in May — after the move:
+
+![Anonymized agent run — AAPL price with agent decisions, and equity vs buy & hold](results/figures/agents_aapl_2026.png)
+
+| Mar 1 – Jun 1, 2026 (64 trading days) | cum return | ann vol | Sharpe | max DD | hit rate |
+|---|---:|---:|---:|---:|---:|
+| Agent desk (anonymized) | **−0.9%** | 6.0% | −1.21 | 4.4% | 50% |
+| Buy & hold | **+15.7%** | 20.9% | 2.66 | 6.9% | 54% |
+
+*Yes, this run is itself one ticker over one quarter — deliberately, as a methodology
+demonstration on data the model can't simply recall. At n = 64 days the Sharpe gap is
+directional evidence, not statistical significance; the multi-ticker, multi-quarter sweep
+is roadmap item 1. The interesting part is the shape of the failure: persistently late,
+not merely unlucky.*
+
+*Masking note: this recorded run used anonymization **v1**, which masked names and dates
+but left raw price levels visible — a potential re-identification fingerprint. The
+current code rebases prices to an index (start = 100) and volumes to percent-of-average
+(**v2**), closing that channel. Notably, even with the v1 fingerprint available, the
+agents did not trade as if they recalled this window.*
+
+The agents traded cautiously (never above 0.35 exposure), which kept volatility at a
+third of buy-and-hold — but the direction was wrong for two of the three months. One
+13-decision run costs ≈ **$3.70 of API calls** (104 deep + 39 quick), and every response
+is disk-cached, so reruns are free and deterministic.
+
+<details>
+<summary><b>Full decision log</b> (per-day debate transcripts in <a href="results/transcripts/">results/transcripts/</a>)</summary>
+
+*Decisions are fund-manager-approved target exposures (SELL = short). On HOLD days the
+engine carries the prior position forward — a size printed on a HOLD (e.g. 04-28) is
+advisory and ignored. Positions take effect the next trading day and pay 10 bps per unit
+turnover. The trader may overrule the research verdict after the risk debate (e.g. the
+05-19 BUY on a NEUTRAL verdict).*
+
+| date | decision | position held | research verdict |
+|---|---|---:|---|
+| 2026-03-02 | HOLD | 0.00 | NEUTRAL |
+| 2026-03-09 | SELL 0.25 | −0.25 | BEARISH |
+| 2026-03-16 | HOLD | −0.25 | NEUTRAL |
+| 2026-03-23 | SELL 0.15 | −0.15 | BEARISH |
+| 2026-03-30 | SELL 0.30 | −0.30 | BEARISH |
+| 2026-04-07 | HOLD | −0.30 | NEUTRAL |
+| 2026-04-14 | HOLD | −0.30 | NEUTRAL |
+| 2026-04-21 | HOLD | −0.30 | NEUTRAL |
+| 2026-04-28 | HOLD (0.20) | −0.30 | NEUTRAL |
+| 2026-05-05 | BUY 0.35 | +0.35 | BULLISH |
+| 2026-05-12 | BUY 0.25 | +0.25 | BULLISH |
+| 2026-05-19 | BUY 0.30 | +0.30 | NEUTRAL |
+| 2026-05-27 | BUY 0.20 | +0.20 | BULLISH |
+
+</details>
+
+## Architecture
+
+```
+             ┌──────────────────────  Analyst team  ──────────────────────┐
+  data ─────▶│ Market (deep)  Fundamentals (quick)  News+Sentiment (quick)│
+             └──────────────────────────┬────────────────────────────────┘
+                          structured reports (not chat history)
+                                        ▼
+                       Bull ⇄ Bear research debate (n rounds, deep)
+                                → facilitator verdict (JSON)
+                                        ▼
+                          Trader decision (deep, JSON action/size)
+                                        ▼
+                    Risky / Neutral / Safe risk debate (quick)
+                          → Fund manager approval (deep, JSON)
+                                        ▼
+              signal ∈ [-1,1] ──▶ backtest engine (t+1 shift, costs)
+```
+
+- **Quick model**: `claude-haiku-4-5` · **Deep model**: `claude-opus-4-8`
+  (override with `TRADINGLAB_QUICK_MODEL` / `TRADINGLAB_DEEP_MODEL`).
+- Every LLM response is disk-cached (`cache/llm/`), so re-running a backtest is free and
+  deterministic. Every decision day writes a full markdown transcript (explainability).
+- The backtest engine enforces no-lookahead by construction: signals computed at close of
+  day *t* earn returns from *t+1*, positions pay 10 bps per unit turnover.
+
+Full design rationale and module contracts: [DESIGN.md](DESIGN.md).
+
+## Quickstart
+
+With [uv](https://docs.astral.sh/uv/) (reproducible — installs the exact locked versions CI tests against):
+
+```bash
+uv sync --locked
+uv run pytest tests/ -q             # incl. no-lookahead perturbation tests
+
+uv run python -m tradinglab.cli download   # 10 tickers, 2015 → today (cached parquet)
+uv run python -m tradinglab.cli baselines  # the paper's 5 rule strategies, full history
+uv run python -m tradinglab.cli train-ml   # LightGBM walk-forward, test window 2021 →
+```
+
+Or with plain pip:
+
+```bash
+pip install -e .[dev]
+python -m pytest tests/ -q
+
+python -m tradinglab.cli download
+python -m tradinglab.cli baselines
+python -m tradinglab.cli train-ml
+```
+
+### Running the LLM agents (needs `ANTHROPIC_API_KEY`)
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...   # PowerShell: $env:ANTHROPIC_API_KEY = "sk-ant-..."
+
+# 3 months of AAPL, one decision per week, anonymized (leakage-safe):
+python -m tradinglab.cli agents --ticker AAPL --start 2026-03-01 --end 2026-06-01 \
+    --every 5 --anonymize
+
+# live mode (fetches current fundamentals + news into the prompts — only meaningful
+# when the window ends ~today, since yfinance fundamentals are not point-in-time):
+python -m tradinglab.cli agents --ticker AAPL --start 2026-05-01 --end 2026-07-03 --live
+```
+
+Cost control: `--every N` (decide every N trading days), `--max-days N` (cap decision
+count). One decision day ≈ 8 deep + 3 quick calls ≈ 15–25k input tokens. The CLI prints a
+token/cost summary after every run; repeated runs hit the disk cache and cost nothing.
+
+**For a trustworthy evaluation of the agent layer, only use windows after the model's
+knowledge cutoff, or `--anonymize`.** Backtesting an LLM on dates it was trained through
+measures memory, not skill — this is the paper's central flaw.
+
+### One ticker, right now
+
+Two commands cover the "what does the desk think of this stock today?" case without a
+backtest window (`pip install` also puts a `tradinglab` command on the path, equivalent
+to `python -m tradinglab.cli`):
+
+```bash
+# No API key: print exactly what the agents would see (prices, indicators, returns,
+# current fundamentals + headlines), with data-quality notes. Add --json for one document.
+python -m tradinglab.cli snapshot --ticker NVDA
+
+# Needs ANTHROPIC_API_KEY: run the full desk once on that snapshot (~$0.20–0.50).
+python -m tradinglab.cli desk --ticker NVDA
+```
+
+The rule on this path is that a data problem is never analysed silently:
+
+- **Prices are downloaded fresh** on every snapshot (a download under 15 minutes old is
+  reused, unless it is already known to be missing the newest session). If Yahoo returns
+  nothing, the previous download is shown and flagged `prices_behind`. Desk downloads
+  live in their own cache folder, so an intraday bar can never reach a backtest through
+  a shared price file.
+- **An unfinished session is labelled as one.** Whether the newest bar is final is
+  decided on the exchange's own clock (Tokyo, crypto and US half-days included), and
+  Yahoo's calendar is cross-checked against its own last-trade time, because the calendar
+  has been seen an hour early with trades still printing. When the answer cannot be
+  established it is reported as unknown, not assumed to be a close. One limit is known:
+  where Yahoo's calendar is an hour early, a bar can be called final while the session
+  still has most of an hour to run. That lasts up to 15 minutes when the quote feed is
+  delayed, and, for a thinly traded symbol, for as long as its latest trade sits in the
+  15 minutes after the calendar's close.
+- **Gaps are named.** An old bar (noted after 5 days, called stale after 12, which is
+  longer than any scheduled exchange closure), a non-dollar price currency (pence and
+  cents spelled out), statements reported in a different currency from the share price,
+  and fundamentals that Yahoo returned empty or incomplete (its usual answer when
+  rate-limiting) each produce a note. The notes that change how the numbers must be read also go at the top
+  of the agents' prompt.
+- **An empty price download says why.** Yahoo answers a rate limit and an unknown symbol
+  with the same empty frame; the error tells them apart when Yahoo said which it was,
+  since one calls for a retry and the other does not. Anything else (a timeout, a 5xx)
+  is retried and then falls back to the previous download.
+- **Past dates never receive fundamentals or news.** Yahoo serves current values only,
+  so they would leak the future. `snapshot --date 2026-03-09 --anonymize` shows the
+  masked block a backtest decision day is given today (the published AAPL run predates
+  the price rebasing, so its prompts differed).
+- **`desk` will not spend API credit on bad data.** It exits before any LLM call when
+  the snapshot is stale, prices are behind, or live data was asked for and none came
+  back; `--allow-degraded` overrides those. Every command that saves something (`desk`,
+  `agents`, `probe`, `baselines`, `train-ml`, and `download` for its cache) first proves
+  it can write it. It saves a transcript and a JSON record under
+  `results/desk/`. A repeat is only free when prices, fundamentals and headlines all come
+  back unchanged, which during market hours they never do.
+
+## Use it from your coding agent (skill)
+
+[`skill/trading-agents-desk/`](skill/trading-agents-desk/) packages the desk as an
+[agent skill](https://agentskills.io): a `SKILL.md` plus role briefs that Claude Code,
+Codex, Cursor and similar agents can load. The agent runs `snapshot` for the evidence and
+then plays the twelve roles itself, so **no Anthropic API key is needed** — the host
+agent's own model does the reasoning. Ask it to "analyze NVDA" and you get the simulated
+desk's sized BUY / SELL / HOLD view, the strongest argument on each side, and what would
+change it.
+
+- **Claude Code:** copy the folder to `~/.claude/skills/trading-agents-desk/` (or
+  `.claude/skills/` inside a project).
+- **Marketplaces:** `python skill/build_skill.py` writes `dist/trading-agents-desk.zip`;
+  listing copy and the upload checklist are in [`skill/LISTING.md`](skill/LISTING.md).
+
+The skill installs this package from a pinned release tag into its own virtual
+environment (`~/.tradinglab/venv`), so the tag named in `SKILL.md` must exist before the
+skill is shared. The build refuses to write the ZIP until it does.
+
+Two limits are deliberate, and the skill states both to the user:
+
+- **That mode has never been backtested.** An agent that runs the roles itself knows
+  which ticker and date it asked for, so it cannot be anonymized, and it is only sound on
+  the current date. The skill sends historical evaluation through `agents --anonymize`
+  and `probe` instead. The one published result (−0.9% against +15.7% for buy-and-hold)
+  comes from a reduced, price-only run through the API.
+- **It takes no personal inputs.** The desk is a simulation that starts from no position.
+  It does not ask for holdings, and it never trades.
+
+## Trader dashboard (no code needed)
+
+Everything in this repo can be driven from a point-and-click web dashboard — no Python
+knowledge required.
+
+**To start it: double-click `run_dashboard.bat`** (Windows). It installs the two dashboard
+dependencies, opens your browser at `http://localhost:8501`, and starts the app. Close the
+console window to stop it. On macOS/Linux (or if you prefer the terminal), run:
+
+```bash
+pip install -r requirements-app.txt   # or: uv sync --locked --extra app
+python -m streamlit run app.py
+```
+
+**What each page does:**
+
+- **Results** — interactive equity-curve comparisons (any stock, full history or the agent
+  run window, agent desk highlighted) and the metrics tables for every saved run
+  (baselines, the ML model, agent backtests), read straight from `results/*.csv`.
+- **AI Trading Desk** — pick any stock and click *Run AI analysis*: the full agent
+  pipeline runs on the **latest market data** (prices, fundamentals, news) and returns a
+  BUY / SELL / HOLD card with suggested exposure, the complete reasoning (every analyst
+  report, the bull-vs-bear debate, the risk team's ruling), an interactive candlestick
+  chart, and the exact API cost of the run (typically $0.20–0.50; a rerun is only free
+  when the prices, fundamentals and headlines have not changed).
+- **Paper Portfolio** — a simulated account that starts with $100,000 of pretend cash
+  (`results/portfolio.json`). Apply the AI desk's latest decision with one click, or buy
+  and sell manually at live prices, and track profit/loss — without risking a cent.
+- **Transcripts** — the full debate transcript for any past decision day.
+
+**API key:** the AI Trading Desk needs an Anthropic API key to call the LLMs. Paste it
+into the key box in the dashboard sidebar (it is kept in your session only and never
+written to disk). All other pages work without any key.
+
+**Safety note:** nothing in this project connects to a brokerage or places real orders.
+The "paper portfolio" is bookkeeping in a local JSON file; all results are simulations on
+historical data. See [Limitations](#limitations-read-before-believing-any-backtest) before
+acting on any output.
+
+### Memorization probe: measure the leak instead of assuming it
+
+Stated knowledge cutoffs are not a leakage guarantee, and no prompt clause can delete
+knowledge baked into pretraining weights. Before trusting any backtest window, probe it:
+
+```bash
+python -m tradinglab.cli probe --ticker AAPL --start 2024-01-02 --end 2024-03-28
+```
+
+With **no market data in the prompt** (ticker + dates only), the model is asked to recall
+approximate closing prices on 8 dates in the window and the rise/fall direction of each
+calendar month. Price errors are compared against a naive carry-forward anchor (the last
+close before the window — a model with no knowledge of the window cannot beat it), and
+direction hits against a 50% coin-flip. The verdict is a heuristic screen, not a proof:
+
+- **CONTAMINATED** — the model halves the naive anchor's price error, or calls monthly
+  direction at ≥ 75% with mostly high confidence. Backtests on this window measure
+  memory, not skill: use `--anonymize` and heavily discount the results.
+- **LIKELY CLEAN** — price guesses at or worse than the anchor and direction near chance;
+  the window appears outside what the model can recall.
+- **INCONCLUSIVE** — mixed signal; prefer `--anonymize` plus post-cutoff windows.
+
+Per-question records and the summary are saved to `results/probe_{ticker}_{start}_{end}.json`.
+Requires `ANTHROPIC_API_KEY`; probe calls go through the LLM disk cache, so re-runs are free.
+
+## The rest of the evidence
+
+All numbers net of 10 bps costs, Sharpe vs 4% risk-free, equal-weight 10-ticker portfolio.
+Baseline and long/short ML tables in `results/*.csv`, per-ticker equity plots in
+`results/*.png`. Regenerate the README figures with `python scripts/make_figures.py`
+(requires the price cache from `python -m tradinglab.cli download` first).
+
+### The anonymized agent run, in the paper's own figure styles
+
+Strategy comparison (paper Fig. 7 style) — the agent desk in bold against the five rule
+baselines over the same window:
+
+![Strategy comparison — cumulative returns for AAPL with the agent desk highlighted](results/figures/agents_aapl_2026_comparison.png)
+
+Transaction history (paper Fig. 6 style) — portfolio value and exposure, per-trade P/L,
+and candlesticks with the agents' buy/sell markers:
+
+![Agent desk transaction history for AAPL — value, trade P/L, candlesticks with decision markers](results/figures/agents_aapl_2026_txn.png)
+
+### The paper's baselines, 2015 → mid-2026 (2,891 trading days)
+
+![Sharpe ratio by strategy — buy & hold 1.08, SMA cross 0.10, MACD −0.41, ZMR −0.77, KDJ+RSI −0.84](results/figures/baselines_sharpe.png)
+
+| strategy | cum return | ann return | Sharpe | max DD |
+|---|---:|---:|---:|---:|
+| buy & hold | **+1848%** | **+29.5%** | **1.08** | 34% |
+| SMA cross | +64% | +4.4% | 0.10 | 24% |
+| MACD | −43% | −4.8% | −0.41 | 49% |
+| ZMR | −69% | −9.6% | −0.77 | 72% |
+| KDJ+RSI | −75% | −11.2% | −0.84 | 76% |
+
+Over this 11.5-year horizon three of the four rule baselines lose money outright, and the
+fourth (SMA cross, Sharpe 0.10) is left far behind by buy-and-hold. "Beating them" over
+three months is not evidence of skill.
+
+### LightGBM walk-forward (23 scale-free technical features; test 2021 → mid-2026)
+
+| variant | cum return | Sharpe | avg daily turnover |
+|---|---:|---:|---:|
+| long/short, θ=0 | −19% | −0.51 | 0.69 |
+| long-only, θ=0 | +76% | 0.48 | 0.35 |
+| buy & hold (same window) | +259% | 0.97 | ~0 |
+
+*The long/short row is `PORTFOLIO/ml` in `results/ml_metrics.csv`; the long-only row is a
+`train-ml --long-only` rerun (which overwrites that same CSV), and turnover is computed by
+the backtest engine but not exported to the CSV. All three are reproducible from the
+committed `results/ml_predictions.csv`.*
+
+Findings a 3-month backtest could never show:
+1. **The short side is systematically toxic** in an upward-drifting mega-cap universe —
+   every long/short variant has negative Sharpe at every threshold.
+2. **Turnover is the killer**: 0.35–0.69 daily turnover at 10 bps costs ≈ 9–17%/year,
+   larger than any daily-horizon predictive edge the model finds.
+3. Daily direction prediction from technical features alone does not beat buy-and-hold
+   after costs on this universe. This is the bar the LLM agent layer has to clear — and
+   the null hypothesis it must be measured against.
+
+## Verification
+
+- 326 pytest tests, including **perturbation-based no-lookahead property tests** (mutate
+  future rows → assert all earlier features/indicators/engine outputs are bit-identical).
+- A five-dimension adversarial review pass (lookahead, statistics, costs, data hygiene,
+  prompt leakage — every finding independently re-verified before acceptance) surfaced
+  and fixed 17 issues, including: the walk-forward embargo not covering the label
+  horizon, drawdown measured only from post-inception peaks, Sortino using the wrong
+  downside deviation, warm-up-period phantom positions in two baselines, and an
+  anonymization gap.
+
+## Limitations (read before believing any backtest)
+
+- Survivorship bias: the 10-ticker universe is today's winners; results overstate what was
+  achievable ex ante. A point-in-time universe (e.g. historical S&P constituents) is on
+  the roadmap.
+- Anonymization masks tickers and dates and rebases all levels: OHLC is scaled so the
+  first displayed close is exactly 100 (index levels, not dollars) and volume is reported
+  as % of the window's average day, with indicators and return stats computed from the
+  rebased frame so nothing at the real scale leaks. Residual risk remains even so: the
+  *shape* of the return path could in principle be matched against memorized history, and
+  regime knowledge (what markets in general were doing) survives any masking —
+  anonymization reduces leakage, only forward-testing on post-cutoff data eliminates it.
+- yfinance fundamentals/news are current-snapshot, not point-in-time → live mode only.
+- Single-asset signals with equal-weight aggregation; no position sizing, borrow costs,
+  or market-impact modeling beyond linear bps.
+- The anonymized agent result is one ticker over one quarter — a proof of methodology,
+  not a verdict on LLM trading. The multi-ticker, multi-quarter sweep is the next run.
+- **Nothing here is investment advice.** Backtest ≠ live performance; markets are close to
+  efficient at daily horizons and most published edges are artifacts of exactly the
+  methodology errors this repo exists to avoid.
+
+## Research roadmap
+
+1. **Post-cutoff agent evaluation** — run the agent pipeline weekly on data after the
+   backbone model's knowledge cutoff; compare anonymized vs named prompts to *measure*
+   memorization leakage directly (the delta is the leak).
+2. **Cross-sectional ML** — predict relative (rank) returns across the universe instead of
+   absolute direction; long top-quintile / short bottom-quintile with weekly rebalance to
+   cut turnover.
+3. **Cost-aware execution** — only trade when the signal change clears a cost hurdle
+   (no-trade band), which the threshold sweep suggests is worth several Sharpe tenths.
+4. **Hybrid model** — feed the ML model's prediction into the agent snapshot as one more
+   analyst report; test whether LLM reasoning adds incremental alpha over its own inputs.
+5. **Point-in-time universe & fundamentals** (paid data), intraday extensions, and
+   regime-conditional evaluation (2022 bear vs 2023–24 bull).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
