@@ -1,4 +1,4 @@
-"""Command-line interface for trading-agents-lab.
+"""Command-line interface for TRADEX.
 
 Subcommands:
     download   fetch and cache the daily price universe
@@ -759,7 +759,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Build the argparse parser with all subcommands."""
     parser = argparse.ArgumentParser(
         prog="tradinglab",
-        description="TradingAgents research lab: baselines, ML alpha, LLM agents.",
+        description="TRADEX research lab: baselines, ML alpha, LLM agents.",
     )
     parser.add_argument("--version", action="version", version=f"tradinglab {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)

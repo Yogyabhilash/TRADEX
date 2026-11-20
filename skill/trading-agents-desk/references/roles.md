@@ -3,7 +3,7 @@
 The desk has twelve roles in four stages. Run them in this order. Each role
 sees only the inputs listed for it. The briefs follow the prompts the API
 pipeline uses, which are public:
-https://github.com/Yogyabhilash/trading-agents-lab/blob/main/src/tradinglab/agents/prompts.py
+https://github.com/Yogyabhilash/TRADEX/blob/main/src/tradinglab/agents/prompts.py
 
 Where a brief adds a rule the pipeline does not enforce, it says so.
 

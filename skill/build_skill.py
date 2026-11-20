@@ -44,7 +44,7 @@ _YAML_NON_STRING = re.compile(
     r"|[-+]?\.(inf|nan)|\d{4}-\d{1,2}-\d{1,2}([Tt ].*)?)"
 )
 _RELEASE_URL_RE = re.compile(
-    r"https://github\.com/Yogyabhilash/trading-agents-lab/archive/refs/tags/"
+    r"https://github\.com/Yogyabhilash/TRADEX/archive/refs/tags/"
     r"(v[0-9][0-9A-Za-z.\-]*)\.zip"
 )
 

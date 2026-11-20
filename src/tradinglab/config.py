@@ -1,4 +1,4 @@
-"""Central configuration for trading-agents-lab.
+"""Central configuration for TRADEX.
 
 All modules import path constants and config dataclasses from here.
 """

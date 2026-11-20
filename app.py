@@ -1,6 +1,6 @@
-"""TradingAgents Lab — trader dashboard.
+"""TRADEX — trader dashboard.
 
-A point-and-click interface over the trading-agents-lab research framework:
+A point-and-click interface over the TRADEX research framework:
 backtest results, a live AI trading desk, a paper-trading portfolio, and the
 full decision transcripts. Launch with ``run_dashboard.bat`` or::
 
@@ -29,7 +29,7 @@ from plotly.subplots import make_subplots  # noqa: E402
 import dashboard_lib as lib  # noqa: E402
 from tradinglab.config import DEFAULT_TICKERS, RESULTS_DIR, AgentConfig  # noqa: E402
 
-st.set_page_config(page_title="TradingAgents Lab", page_icon="📈", layout="wide")
+st.set_page_config(page_title="TRADEX", page_icon="📈", layout="wide")
 
 _HIGHLIGHT = "#6b3f2a"
 _GREEN = "#0ca30c"
@@ -561,7 +561,7 @@ def page_transcripts() -> None:
 
 def main() -> None:
     with st.sidebar:
-        st.markdown("## 📈 TradingAgents Lab")
+        st.markdown("## 📈 TRADEX")
         page = st.radio("Go to", ["Results", "AI Trading Desk",
                                   "Paper Portfolio", "Transcripts"])
         st.divider()
@@ -576,7 +576,7 @@ def main() -> None:
         page_transcripts()
     st.divider()
     st.caption(
-        "trading-agents-lab · autonomous multi-agent quantitative trading system · "
+        "TRADEX · autonomous multi-agent quantitative trading system · "
         "all performance shown net of 10 bps costs · this is not financial advice"
     )
 

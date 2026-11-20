@@ -85,5 +85,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   markdown transcripts for explainability, and a 62-test pytest suite including no-lookahead
   perturbation tests.
 
-[0.2.0]: https://github.com/Yogyabhilash/trading-agents-lab/releases/tag/v0.2.0
-[0.1.0]: https://github.com/Yogyabhilash/trading-agents-lab/releases/tag/v0.1.0
+[0.2.0]: https://github.com/Yogyabhilash/TRADEX/releases/tag/v0.2.0
+[0.1.0]: https://github.com/Yogyabhilash/TRADEX/releases/tag/v0.1.0

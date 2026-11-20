@@ -1,10 +1,10 @@
-# trading-agents-lab
+# TRADEX
 
 **Do LLM trading agents actually have skill, or are they reciting memorized price history?**
 A rigorous research implementation of an autonomous multi-agent LLM financial trading
 framework — plus the quant research harness to evaluate it honestly.
 
-[![CI](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml)
+[![CI](https://github.com/Yogyabhilash/TRADEX/actions/workflows/ci.yml/badge.svg)](https://github.com/Yogyabhilash/TRADEX/actions/workflows/ci.yml)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)
 
 This system simulates a trading firm with autonomous LLM agents: four analysts (market/technical,

@@ -11,7 +11,7 @@ command, then run it through the multi-agent trading desk: four analysts, a
 bull-vs-bear debate, a trader, a three-way risk review and a fund manager who
 signs off.
 
-It is built on the `trading-agents-lab` package with an integrated backtest
+It is built on the `TRADEX` package with an integrated backtest
 harness. In that harness's own test a reduced version of the desk did not beat buy-and-hold,
 which is why the rules below are strict about what this output is.
 
@@ -69,7 +69,7 @@ python3 -m venv ~/.tradinglab/venv
 ```
 
 ```bash
-~/.tradinglab/venv/bin/python -m pip install "https://github.com/Yogyabhilash/trading-agents-lab/archive/refs/tags/v0.2.0.zip"
+~/.tradinglab/venv/bin/python -m pip install "https://github.com/Yogyabhilash/TRADEX/archive/refs/tags/v0.2.0.zip"
 ```
 
 Then run the check again. Notes for setup:

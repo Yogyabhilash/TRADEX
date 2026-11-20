@@ -1,4 +1,4 @@
-"""Agent roles for the TradingAgents pipeline.
+"""Agent roles for the TRADEX pipeline.
 
 Each function wraps one team of the multi-agent workflow: analysts produce
 reports, bull/bear researchers debate, a trader proposes a trade, and the

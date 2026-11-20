@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "trading-agents-lab"
+name = "tradex"
 version = "0.2.0"
-description = "Autonomous Multi-Agent LLM Financial Trading Framework & Quant Research Harness"
+description = "TRADEX: Autonomous Multi-Agent LLM Financial Trading Framework & Quant Research Harness"
 authors = [{ name = "Sai Yogyabhilash", email = "saiyogyabhilash06bramhanapalli@gmail.com" }]
 requires-python = ">=3.10"
 dependencies = [
@@ -21,6 +21,7 @@ dependencies = [
 
 [project.scripts]
 tradinglab = "tradinglab.cli:main"
+tradex = "tradinglab.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]

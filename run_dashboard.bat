@@ -1,6 +1,6 @@
 @echo off
 rem ------------------------------------------------------------------
-rem  trading-agents-lab -- trader dashboard launcher (no coding needed)
+rem  TRADEX -- trader dashboard launcher (no coding needed)
 rem  Installs the dashboard dependencies, opens your browser, and
 rem  starts the Streamlit app. Close this window to stop the dashboard.
 rem ------------------------------------------------------------------

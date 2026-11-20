@@ -1,4 +1,4 @@
-# trading-agents-lab — Design Document
+# TRADEX — Design Document
 
 A rigorous implementation of an autonomous multi-agent LLM financial trading
 framework, built with deep methodological rigor, plus a classical ML alpha stack
@@ -23,7 +23,7 @@ so we can answer: *does the LLM layer add anything beyond a well-tuned quant bas
 ## 2. Directory layout
 
 ```
-trading-agents-lab/
+TRADEX/
 ├── DESIGN.md                    # this file
 ├── README.md                    # project overview + headline results
 ├── pyproject.toml

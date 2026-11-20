@@ -282,7 +282,7 @@ def test_validate_rejects_binary_payloads_and_missing_skill_md(tmp_path):
         build_skill.validate(tmp_path / "empty-skill")
 
 
-URL = "https://github.com/Yogyabhilash/trading-agents-lab/archive/refs/{ref}.zip"
+URL = "https://github.com/Yogyabhilash/TRADEX/archive/refs/{ref}.zip"
 
 
 def test_validate_rejects_an_install_from_a_branch(tmp_path):

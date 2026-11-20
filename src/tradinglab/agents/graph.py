@@ -1,7 +1,7 @@
 """Snapshot construction, pipeline orchestration and the agent backtest.
 
 `snapshot_from_history` turns point-in-time price history into the text
-snapshot the agents see; `TradingAgentsPipeline` chains the agent teams for
+snapshot the agents see; `TradexPipeline` chains the agent teams for
 one decision day; `run_agent_backtest` walks the pipeline over a date range
 and scores the resulting signal with the standard backtest engine.
 """
@@ -216,6 +216,9 @@ class TradingAgentsPipeline:
             final_action=risk.final_action,
             final_size=risk.final_size,
         )
+
+
+TradexPipeline = TradingAgentsPipeline
 
 
 def run_agent_backtest(df: pd.DataFrame, ticker: str, start: str, end: str,

@@ -35,7 +35,7 @@ before anyone can use the listing.
    ```
 
    ```bash
-   ~/.tradinglab/venv/bin/python -m pip install "https://github.com/Yogyabhilash/trading-agents-lab/archive/refs/tags/v0.2.0.zip"
+   ~/.tradinglab/venv/bin/python -m pip install "https://github.com/Yogyabhilash/TRADEX/archive/refs/tags/v0.2.0.zip"
    ```
 
    ```bash
@@ -60,11 +60,11 @@ tag and the package version disagree.
 | Name | `trading-agents-desk` |
 | Category | Trading & Investing |
 | Version | 1.0.0 |
-| Docs URL | https://github.com/Yogyabhilash/trading-agents-lab |
+| Docs URL | https://github.com/Yogyabhilash/TRADEX |
 
 **Summary (one line)**
 
-Research simulation of the TradingAgents multi-agent desk: four analysts, a
+Research simulation of the TRADEX multi-agent desk: four analysts, a
 bull-vs-bear debate, a trader and a risk team argue over one stock and return
 a sized BUY/SELL/HOLD view. Not investment advice.
 
