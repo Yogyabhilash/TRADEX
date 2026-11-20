@@ -1,21 +1,19 @@
 ---
 name: trading-agents-desk
 description: Runs a simulated multi-agent trading desk on one stock (analyst team, bull-vs-bear debate, trader, risk team, fund manager) from a current market snapshot and returns the desk's sized BUY/SELL/HOLD view with the reasoning on both sides. Use when the user asks to analyze a ticker, wants the bull and bear case or a second opinion on a stock, asks whether a stock looks like a buy, sell or hold, or wants to backtest LLM trading agents with lookahead prevented and memorization leakage measured.
-license: MIT
 ---
 
 # Trading agents desk
 
 A structured second opinion on a single stock. You fetch a market snapshot
 (daily prices, technical indicators, fundamentals, headlines) with one
-command, then run it through the desk from the TradingAgents paper
-(arXiv:2412.20138): four analysts, a bull-vs-bear debate, a trader, a
-three-way risk review and a fund manager who signs off.
+command, then run it through the multi-agent trading desk: four analysts, a
+bull-vs-bear debate, a trader, a three-way risk review and a fund manager who
+signs off.
 
-It is built on the open-source `trading-agents-lab` package, an independent
-reimplementation of that paper with a backtest harness. In that harness's own
-test a reduced version of the desk did not beat buy-and-hold, which is why the
-rules below are strict about what this output is.
+It is built on the `trading-agents-lab` package with an integrated backtest
+harness. In that harness's own test a reduced version of the desk did not beat buy-and-hold,
+which is why the rules below are strict about what this output is.
 
 ## Ground rules
 

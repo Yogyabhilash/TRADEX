@@ -65,9 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-07-05
 
 ### Added
-- Faithful reimplementation of the multi-agent LLM trading framework from *TradingAgents*
-  (Xiao et al., arXiv:2412.20138): four analysts feed a bull-vs-bear research debate, a
-  trader synthesizes a decision, a risk-management trio debates it, and a fund manager
+- Autonomous multi-agent LLM trading framework: four analysts feed a bull-vs-bear research
+  debate, a trader synthesizes a decision, a risk-management trio debates it, and a fund manager
   approves the final trade.
 - Leakage-safe evaluation harness with an anti-leakage prompt clause on every agent and an
   `--anonymize` mode that masks ticker names and dates and rebases prices to an index
@@ -78,10 +77,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   carry-forward anchor and a coin-flip baseline (CONTAMINATED / LIKELY CLEAN / INCONCLUSIVE).
 - Backtest engine with no-lookahead by construction (t+1 signal shift) and always-on 10 bps
   per-unit-turnover transaction costs, validated by perturbation-based property tests.
-- The paper's five rule baselines plus a LightGBM walk-forward model (expanding window,
+- Five classic rule baselines plus a LightGBM walk-forward model (expanding window,
   embargoed splits) evaluated over 11.5 years of data across 10 tickers.
 - Streamlit trader dashboard (`app.py`) with Results, AI Trading Desk, Paper Portfolio, and
-  Transcripts pages, plus paper-style figures reproducing the original Fig. 6/7 layouts.
+  Transcripts pages, plus comprehensive strategy and transaction figures.
 - Disk-cached LLM responses (`cache/llm/`) for free, deterministic reruns, per-decision
   markdown transcripts for explainability, and a 62-test pytest suite including no-lookahead
   perturbation tests.

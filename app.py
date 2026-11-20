@@ -64,7 +64,7 @@ def last_price_cached(ticker: str, max_age_s: float = 300.0) -> tuple[float | No
 
 def equity_comparison_figure(curves: dict[str, pd.Series],
                              highlight: str | None = None) -> go.Figure:
-    """Interactive cumulative-return comparison (paper Fig-7 style)."""
+    """Interactive cumulative-return comparison."""
     fig = go.Figure()
     ordered = [n for n in curves if n != highlight]
     if highlight in curves:
@@ -326,7 +326,7 @@ def _decision_card(ticker: str, log) -> None:
 def page_desk() -> None:
     st.title("🤖 AI Trading Desk — live analysis")
     st.caption(
-        "One click runs the full agent pipeline from the research paper on the "
+        "One click runs the full multi-agent pipeline on the "
         "latest market data: four analysts report, a bull and a bear debate, a "
         "trader decides, a risk team challenges it, and a fund manager signs off."
     )
@@ -540,7 +540,7 @@ def page_transcripts() -> None:
     st.title("📜 Decision transcripts")
     st.caption(
         "Every decision the agents ever made, with the full debate — the "
-        "'explainability' the research paper promises. Newest first."
+        "'explainability' of multi-agent reasoning. Newest first."
     )
     items = lib.list_transcripts()
     if not items:
@@ -576,7 +576,7 @@ def main() -> None:
         page_transcripts()
     st.divider()
     st.caption(
-        "trading-agents-lab · research implementation of arXiv:2412.20138 · "
+        "trading-agents-lab · autonomous multi-agent quantitative trading system · "
         "all performance shown net of 10 bps costs · this is not financial advice"
     )
 

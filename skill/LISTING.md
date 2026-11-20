@@ -61,7 +61,6 @@ tag and the package version disagree.
 | Category | Trading & Investing |
 | Version | 1.0.0 |
 | Docs URL | https://github.com/Yogyabhilash/trading-agents-lab |
-| License | MIT |
 
 **Summary (one line)**
 
@@ -88,8 +87,7 @@ opinions and for studying LLM trading agents. It is not a signal service and
 not investment advice. It ships no order-placing code and tells your agent not
 to call brokerage tools.
 
-The desk is an independent reimplementation of the design in the TradingAgents
-paper (Xiao et al., arXiv:2412.20138). It is not the paper authors' code.
+The desk is an autonomous multi-agent trading framework engineered for quantitative market analysis and research.
 
 No API key or data subscription is needed for the default workflow. Market
 data is Yahoo Finance daily bars fetched by your own machine, and your own
@@ -107,7 +105,7 @@ memorization probe that measures whether a model simply remembers the period
 you are testing. The backtests of the agent desk and the probe call the
 Anthropic API and need your own key.
 
-The same code is free and MIT licensed on GitHub. The listing sells the
+The complete framework is available on GitHub. The listing provides the
 packaging: one install, and instructions your agent can follow.
 
 **Tags**
@@ -156,16 +154,16 @@ existing users to buy before they can continue. Paid listings also get a
 ranking boost in the marketplace's search. If there are no sales after a
 month, drop it to free for reach.
 
-Do not price or describe it as a signal product. The repository is public and
-MIT licensed, so the listing sells convenience and packaging, and the
-published results do not support a claim of trading edge. Every paid skill
-carries a 30-day money-back guarantee for a skill that "does not do what its
-page promises", which is one more reason to promise only what it does.
+Do not price or describe it as a signal product. The repository is public, so
+the listing sells convenience and packaging, and the published results do not
+support a claim of trading edge. Every paid skill carries a 30-day money-back
+guarantee for a skill that "does not do what its page promises", which is one
+more reason to promise only what it does.
 
 Two things the marketplace does that are worth knowing. It may attach its own
 paid tools to a skill whose description names a model or service, and creators
 get no share of those tool charges. And buyers of a paid listing receive a
-licence that forbids copying it, while the public repository stays MIT: say
+terms that forbid copying it, while the public repository is open: say
 so if a buyer asks.
 
 ## Data source note
@@ -180,5 +178,5 @@ The skill redistributes no data: each buyer's own machine fetches it for that
 buyer's own use. Even so, a paid listing is a commercial product at any
 price, and those terms do not clearly allow one to be built on this data.
 This is the weakest point of a paid listing. Read Yahoo's terms, or move to a
-licensed data source, before taking payment. A free listing carries less of
+commercial data provider, before taking payment. A free listing carries less of
 this risk.

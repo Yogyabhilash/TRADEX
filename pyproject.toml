@@ -5,9 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "trading-agents-lab"
 version = "0.2.0"
-description = "Rigorous reimplementation of the TradingAgents multi-agent LLM trading framework with a quant research harness"
+description = "Autonomous Multi-Agent LLM Financial Trading Framework & Quant Research Harness"
 authors = [{ name = "Sai Yogyabhilash", email = "saiyogyabhilash06bramhanapalli@gmail.com" }]
-license = { text = "MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "pandas>=2.0",

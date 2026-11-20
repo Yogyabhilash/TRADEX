@@ -1,17 +1,16 @@
 # trading-agents-lab — Design Document
 
-A rigorous research implementation of **TradingAgents: Multi-Agents LLM Financial Trading
-Framework** (Xiao et al., arXiv:2412.20138), rebuilt with the methodological rigor the paper
-lacks, plus a classical ML alpha stack so we can answer: *does the LLM layer add anything
-beyond a well-tuned quant baseline?*
+A rigorous implementation of an autonomous multi-agent LLM financial trading
+framework, built with deep methodological rigor, plus a classical ML alpha stack
+so we can answer: *does the LLM layer add anything beyond a well-tuned quant baseline?*
 
 ## 1. Research principles (non-negotiable)
 
 1. **No lookahead.** Every signal at date `t` uses only information available at the close of
    `t`. The backtest engine enforces this by shifting positions one day. Features must never
    reference future rows. Labels are strictly forward.
-2. **LLM knowledge-cutoff leakage is a first-class threat.** The paper backtests GPT-4o on
-   Jan–Mar 2024, which is inside its training data. We mitigate with (a) an anti-leakage
+2. **LLM knowledge-cutoff leakage is a first-class threat.** LLMs tested on historical periods
+   within their training data can recite memorized prices. We mitigate with (a) an anti-leakage
    system-prompt clause, (b) an `--anonymize` mode that masks ticker names and dates AND rebases
    prices to an index (start = 100) with volumes as percent-of-average, so the LLM can
    neither recall memorized price paths nor re-identify the asset from raw levels, and (c) documentation that only post-cutoff
@@ -27,7 +26,6 @@ beyond a well-tuned quant baseline?*
 trading-agents-lab/
 ├── DESIGN.md                    # this file
 ├── README.md                    # project overview + headline results
-├── LICENSE
 ├── pyproject.toml
 ├── requirements.txt
 ├── data/cache/                  # parquet price cache (desk/ holds one-shot desk downloads)

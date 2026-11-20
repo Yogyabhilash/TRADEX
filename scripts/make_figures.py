@@ -177,7 +177,7 @@ def fig_baselines_sharpe() -> None:
     ax.set_xlabel("Sharpe ratio (net of 10 bps, vs 4% risk-free)", fontsize=9)
     ax.margins(x=0.12)
     ax.set_title(
-        "The paper's rule baselines over an honest horizon — "
+        "Rule baselines over an honest horizon — "
         "equal-weight 10-ticker portfolio, 2015 → mid-2026",
         fontsize=11.5, loc="left", color=C_INK, pad=12)
 
@@ -186,7 +186,7 @@ def fig_baselines_sharpe() -> None:
 
 
 def fig_paper_style(prices: pd.DataFrame) -> None:
-    """Paper Fig-7 comparison + Fig-6 transaction history for the agent run."""
+    """Strategy comparison + transaction history for the agent run."""
     decisions = parse_transcript_decisions(ROOT / "results" / "transcripts", TICKER)
     signal = agents_signal(
         decisions.assign(date=pd.to_datetime(decisions["date"]))

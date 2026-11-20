@@ -1,12 +1,12 @@
-"""Publication-style figures modeled on the TradingAgents paper.
+"""Publication-style figures for strategy comparison and transaction history.
 
 Two figure types:
 
 - :func:`plot_strategy_comparison` — cumulative-return comparison of several
-  strategies with one optionally highlighted (paper Fig. 7 style).
+  strategies with one optionally highlighted.
 - :func:`plot_transaction_history` — three stacked panels: portfolio value and
   exposure, per-trade profit/loss dots, and a candlestick chart with volume and
-  buy/sell decision markers (paper Fig. 6 style).
+  buy/sell decision markers.
 
 Also provides :func:`parse_transcript_decisions` to recover the structured
 decision log from saved agent transcripts (for runs that predate the
@@ -42,7 +42,7 @@ def plot_strategy_comparison(
     save_path: Path | str,
     highlight: str | None = None,
 ) -> None:
-    """Cumulative-return comparison chart (paper Fig. 7 style).
+    """Cumulative-return comparison chart.
 
     ``equity_curves`` maps strategy name -> equity Series; each curve is
     normalized to start at 1.0. ``highlight`` names the curve drawn last,
@@ -121,7 +121,7 @@ def plot_transaction_history(
     decisions: pd.DataFrame | None = None,
     cost_bps: float = 10.0,
 ) -> None:
-    """Three-panel transaction history (paper Fig. 6 style).
+    """Three-panel transaction history.
 
     Panels: portfolio value + exposure; per-trade net P/L dots; candlesticks
     with volume and BUY/SELL decision markers. ``positions`` is the engine's

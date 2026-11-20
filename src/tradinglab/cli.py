@@ -2,7 +2,7 @@
 
 Subcommands:
     download   fetch and cache the daily price universe
-    baselines  run the paper's five rule baselines + equal-weight portfolio
+    baselines  run five classic rule baselines + equal-weight portfolio
     train-ml   walk-forward LightGBM alpha model vs buy-and-hold
     agents     LLM multi-agent backtest for one ticker (needs ANTHROPIC_API_KEY)
     snapshot   print the market snapshot the agents see for one ticker (no API key)
@@ -429,7 +429,7 @@ def cmd_agents(args: argparse.Namespace) -> None:
     dec_path = RESULTS_DIR / f"agents_{args.ticker}_decisions.csv"
     decisions.to_csv(dec_path, index=False)
 
-    # --- paper-style figures (Fig-7 comparison + Fig-6 transaction history) ---
+    # --- strategy comparison + transaction history figures ---
     # Lazy import: keeps the plotting stack out of key-less/light subcommands.
     from tradinglab.plotting import plot_strategy_comparison, plot_transaction_history
 

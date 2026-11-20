@@ -74,9 +74,7 @@ def test_frontmatter_is_valid_and_matches_folder():
     fields = build_skill.read_frontmatter(SKILL_DIR / "SKILL.md")
     assert fields["name"] == SKILL_DIR.name == "trading-agents-desk"
     assert 0 < len(fields["description"]) <= 1024
-    assert set(fields) <= {"name", "description", "license"}  # portable across harnesses
-    assert (SKILL_DIR / "LICENSE.txt").read_text(encoding="utf-8") == \
-        (REPO_ROOT / "LICENSE").read_text(encoding="utf-8")
+    assert set(fields) <= {"name", "description"}  # portable across harnesses
 
 
 def test_skill_docs_cover_every_workflow():
@@ -196,7 +194,6 @@ def test_build_writes_the_expected_archive(tmp_path):
     with zipfile.ZipFile(out) as archive:
         names = sorted(archive.namelist())
         assert names == [
-            "trading-agents-desk/LICENSE.txt",
             "trading-agents-desk/SKILL.md",
             "trading-agents-desk/references/research-harness.md",
             "trading-agents-desk/references/roles.md",

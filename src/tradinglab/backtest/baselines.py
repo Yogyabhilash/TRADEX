@@ -1,4 +1,4 @@
-"""The paper's five rule-based baseline strategies.
+"""Five classic rule-based baseline strategies.
 
 Each strategy maps the canonical price DataFrame to a signal Series per the
 shared semantics: ``signal[t] in [-1, +1]`` is the desired position computed

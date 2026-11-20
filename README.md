@@ -1,27 +1,23 @@
 # trading-agents-lab
 
 **Do LLM trading agents actually have skill, or are they reciting memorized price history?**
-A rigorous research implementation of **TradingAgents: Multi-Agents LLM Financial Trading
-Framework** ([Xiao et al., arXiv:2412.20138](https://arxiv.org/abs/2412.20138)) — plus the
-quant research harness the paper should have had.
+A rigorous research implementation of an autonomous multi-agent LLM financial trading
+framework — plus the quant research harness to evaluate it honestly.
 
 [![CI](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/Yogyabhilash/trading-agents-lab/actions/workflows/ci.yml)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)
-![License](https://img.shields.io/badge/license-MIT-blue)
-![Paper](https://img.shields.io/badge/arXiv-2412.20138-b31b1b)
 
-The paper simulates a trading firm with LLM agents: four analysts (market/technical,
+This system simulates a trading firm with autonomous LLM agents: four analysts (market/technical,
 fundamentals, news, sentiment) feed a bull-vs-bear research debate, a trader synthesizes a
 decision, a risk-management trio (risky/neutral/safe) debates it, and a fund manager
-approves the final trade. This repo reproduces that architecture faithfully — and wraps it
-in an evaluation framework that fixes the paper's four methodological problems:
+approves the final trade. The evaluation framework addresses four core quantitative challenges:
 
-| Paper's weakness | What this repo does instead |
+| Research Challenge | What this harness does |
 |---|---|
-| 3-month backtest window, 3 tickers | 11.5 years of data, 10 tickers across sectors, multi-year walk-forward test window |
-| LLM likely trained on the backtest period (Jan–Mar 2024 is inside GPT-4o's training data) | Anti-leakage prompt clause on every agent + `--anonymize` mode that masks ticker names and dates **and rebases every price to an index (first displayed close = 100) with volume as % of the window average**, so no raw price or volume level — the fingerprint that identifies a well-known stock — reaches the prompt (residual risk remains — see Limitations) |
-| No transaction costs | 10 bps per unit turnover, always on; cost sensitivity reported |
-| Weak baselines (naive MACD/SMA rules) | The paper's five baselines **plus** a LightGBM walk-forward model (expanding window, embargoed splits) as a serious ML benchmark |
+| Short evaluation windows | 11.5 years of data, 10 tickers across sectors, multi-year walk-forward test window |
+| LLM memorization / lookahead bias | Anti-leakage prompt clause on every agent + `--anonymize` mode that masks ticker names and dates **and rebases every price to an index (first displayed close = 100) with volume as % of the window average**, so no raw price or volume level reaches the prompt (residual risk remains — see Limitations) |
+| Zero transaction costs | 10 bps per unit turnover, always on; cost sensitivity reported |
+| Unbenchmarked performance | Five classic rule-based baselines **plus** a LightGBM walk-forward model (expanding window, embargoed splits) as a serious ML benchmark |
 
 ## The headline result
 
@@ -118,7 +114,7 @@ uv sync --locked
 uv run pytest tests/ -q             # incl. no-lookahead perturbation tests
 
 uv run python -m tradinglab.cli download   # 10 tickers, 2015 → today (cached parquet)
-uv run python -m tradinglab.cli baselines  # the paper's 5 rule strategies, full history
+uv run python -m tradinglab.cli baselines  # 5 classic rule strategies, full history
 uv run python -m tradinglab.cli train-ml   # LightGBM walk-forward, test window 2021 →
 ```
 
@@ -153,7 +149,7 @@ token/cost summary after every run; repeated runs hit the disk cache and cost no
 
 **For a trustworthy evaluation of the agent layer, only use windows after the model's
 knowledge cutoff, or `--anonymize`.** Backtesting an LLM on dates it was trained through
-measures memory, not skill — this is the paper's central flaw.
+measures memory, not skill — which distorts backtest findings.
 
 ### One ticker, right now
 
@@ -308,19 +304,19 @@ Baseline and long/short ML tables in `results/*.csv`, per-ticker equity plots in
 `results/*.png`. Regenerate the README figures with `python scripts/make_figures.py`
 (requires the price cache from `python -m tradinglab.cli download` first).
 
-### The anonymized agent run, in the paper's own figure styles
+### The anonymized agent run: strategy comparison and execution
 
-Strategy comparison (paper Fig. 7 style) — the agent desk in bold against the five rule
+Strategy comparison — the agent desk in bold against the five rule
 baselines over the same window:
 
 ![Strategy comparison — cumulative returns for AAPL with the agent desk highlighted](results/figures/agents_aapl_2026_comparison.png)
 
-Transaction history (paper Fig. 6 style) — portfolio value and exposure, per-trade P/L,
+Transaction history — portfolio value and exposure, per-trade P/L,
 and candlesticks with the agents' buy/sell markers:
 
 ![Agent desk transaction history for AAPL — value, trade P/L, candlesticks with decision markers](results/figures/agents_aapl_2026_txn.png)
 
-### The paper's baselines, 2015 → mid-2026 (2,891 trading days)
+### Baseline strategies, 2015 → mid-2026 (2,891 trading days)
 
 ![Sharpe ratio by strategy — buy & hold 1.08, SMA cross 0.10, MACD −0.41, ZMR −0.77, KDJ+RSI −0.84](results/figures/baselines_sharpe.png)
 
@@ -405,6 +401,4 @@ Findings a 3-month backtest could never show:
 5. **Point-in-time universe & fundamentals** (paid data), intraday extensions, and
    regime-conditional evaluation (2022 bear vs 2023–24 bull).
 
-## License
 
-MIT — see [LICENSE](LICENSE).

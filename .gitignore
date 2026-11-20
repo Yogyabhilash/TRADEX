@@ -15,3 +15,6 @@ dist/
 results/portfolio.json
 results/live_decisions.csv
 results/desk/
+*.pptx
+~$*.pptx
+scripts/generate_presentation.py
