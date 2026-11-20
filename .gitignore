@@ -21,3 +21,6 @@ scripts/generate_presentation.py
 *.docx
 ~$*.docx
 scripts/generate_docx_report.py
+*.pdf
+scripts/generate_academic_report_docx.py
+scripts/read_ppt.py
