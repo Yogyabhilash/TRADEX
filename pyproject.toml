@@ -25,7 +25,7 @@ tradex = "tradinglab.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
-app = ["streamlit>=1.30", "plotly>=5.18"]
+app = ["streamlit>=1.30", "plotly>=7.1.0"]
 
 [dependency-groups]
 dev = ["pytest>=7.0"]
